@@ -1,16 +1,16 @@
 using Core.Models;
 using Microsoft.AspNetCore.Mvc;
-using MockJSONDataAPI.Interfaces;
+using WebAPI.Interfaces;
 
-namespace MockJSONDataAPI;
+namespace WebAPI;
 
 [ApiVersion("1.0")]
 [ApiController]
 [Route("/api/[controller]")]
 public class EmployeesController : ControllerBase
 {
-    private IEmployeesRepository _repo;
-    public EmployeesController(IEmployeesRepository repo)
+    private IRepository<Employee> _repo;
+    public EmployeesController(IRepository<Employee> repo)
     {
         _repo = repo;
     }
@@ -19,7 +19,7 @@ public class EmployeesController : ControllerBase
     public async Task<IActionResult> GetEmployeesAsync()
     {
         var employees = await _repo.GetAllAsync();
-        if (employees.Count > 0)
+        if (employees is not null)
         {
             return Ok(employees);
         }
@@ -30,7 +30,7 @@ public class EmployeesController : ControllerBase
     [Route("findEmployee")]
     public async Task<IActionResult> GetById([FromQuery] string id)
     {
-        Employee? employee = await _repo.FindAsync(id);
+        var employee = await _repo.FindAsync(id);
         if (employee is not null)
         {
             return Ok(employee);
@@ -63,10 +63,10 @@ public class EmployeesController : ControllerBase
 
     [HttpPut]
     [Route("updateEmployee")]
-    public async Task<IActionResult> UpdateEmployee([FromQuery] string empId, [FromBody] Employee newEmployee)
+    public Task UpdateEmployee([FromQuery] string empId, [FromBody] Employee newEmployee)
     {
-        var data = await _repo.UpdateAsync(empId, newEmployee);
-        return Ok(data);
+        _repo.Update(empId, newEmployee);
+        return Task.FromResult("Db is updated");
     }
 
 }

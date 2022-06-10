@@ -1,6 +1,6 @@
 using Core.Models;
 
-namespace MockJSONDataAPI.Interfaces
+namespace WebAPI.Interfaces
 {
     public interface IEmployeesRepository
     {

@@ -1,7 +1,8 @@
+using Core.Models;
 using Microsoft.AspNetCore.Mvc.Versioning;
-using MockJSONDataAPI;
-using MockJSONDataAPI.Interfaces;
-using MockJSONDataAPI.Repositories;
+using WebAPI;
+using WebAPI.Interfaces;
+using WebAPI.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,9 +21,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Register custom service to the IoC container
-builder.Services.AddScoped<IEmployeesRepository, EmployeesRepository>();
+builder.Services.AddScoped<IRepository<Employee>, EmployeeRepository>();
 builder.Services.AddScoped<Employee_ValidationActionFilter>();
 
+builder.Services.AddScoped<IDbEmployeesRepository, DbEmployeeRepository>();
 
 var app = builder.Build();
 
