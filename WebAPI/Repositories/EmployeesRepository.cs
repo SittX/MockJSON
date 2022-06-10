@@ -11,37 +11,48 @@ namespace MockJSONDataAPI.Repositories
 
         public EmployeesRepository()
         {
-            GetAllAsync();
+            PopulateEmpList();
+        }
+        private void PopulateEmpList()
+        {
+            var result = File.ReadAllText(path);
+            var data = JsonConvert.DeserializeObject<List<Employee>>(result);
+            if (data != null) _employees = data;
         }
 
+        #region CRUD methods
         public void Delete(string empId)
         {
             _employees = _employees.Where(e => e.EmployeeId != empId).ToList();
         }
 
-        public async Task<Employee>? FindAsync(string id)
+        public Task<Employee> FindAsync(string id)
         {
-            await GetAllAsync();
             var result = _employees.Where(e => e.EmployeeId == id).ToList();
-            if (result == null)
-            {
-                return null;
-            }
-
-            return result[0];
+            return Task.FromResult(result[0]);
         }
 
-        public async Task<IList<Employee>>? GetAllAsync()
+        public async Task<IList<Employee>> GetAllAsync()
         {
             if (_employees.Count > 0) return _employees;
-            var result = await File.ReadAllTextAsync(path);
-            var data = JsonConvert.DeserializeObject<List<Employee>>(result);
-            if (data != null)
+            try
             {
-                _employees = data;
+                var result = await File.ReadAllTextAsync(path);
+                var data = JsonConvert.DeserializeObject<List<Employee>>(result);
+                if (data is not null)
+                    _employees = data;
                 return _employees;
             }
-            return null;
+            catch (FileNotFoundException fx)
+            {
+                Console.WriteLine(fx.Message);
+                return _employees;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return _employees;
+            }
         }
 
         public void Insert(Employee employee)
@@ -68,5 +79,6 @@ namespace MockJSONDataAPI.Repositories
 
             return Task.FromResult(_employees);
         }
+        #endregion
     }
 }

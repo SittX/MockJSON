@@ -15,27 +15,29 @@ namespace MockJSONDataAPI
         }
         public override async void OnActionExecuting(ActionExecutingContext context)
         {
-            IEnumerable<Employee> employees = await _repo.GetAllAsync();
+            IList<Employee> employees = await _repo.GetAllAsync();
             var employee = context.ActionArguments["employee"] as Employee;
 
-            if (employee == null)
+            if (employee is not null)
+            {
+                foreach (var emp in employees)
+                {
+                    if (emp.EmployeeId == employee.EmployeeId)
+                    {
+                        context.ModelState.AddModelError("EmployeeId", "Duplicate employee object");
+                        var problemDetails = new ValidationProblemDetails(context.ModelState)
+                        {
+                            Status = StatusCodes.Status400BadRequest,
+                        };
+                        context.Result = new BadRequestObjectResult(problemDetails);
+                    }
+                }
+            }
+            else
             {
                 context.ModelState.AddModelError("employee", "Employee object cannot be empty");
                 context.Result = new BadRequestObjectResult(context.ModelState);
             }
-            foreach (var emp in employees)
-            {
-                if (emp.EmployeeId == employee.EmployeeId)
-                {
-                    context.ModelState.AddModelError("EmployeeId", "Duplicate employee object");
-                    var problemDetails = new ValidationProblemDetails(context.ModelState)
-                    {
-                        Status = StatusCodes.Status400BadRequest,
-                    };
-                    context.Result = new BadRequestObjectResult(problemDetails);
-                }
-            }
-
 
         }
 

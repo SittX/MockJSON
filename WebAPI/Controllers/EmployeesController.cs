@@ -16,19 +16,22 @@ public class EmployeesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAllAsync()
+    public async Task<IActionResult> GetEmployeesAsync()
     {
-        var data = await _repo.GetAllAsync();
-        return Ok(data);
+        var employees = await _repo.GetAllAsync();
+        if (employees.Count > 0)
+        {
+            return Ok(employees);
+        }
+        return BadRequest();
     }
 
     [HttpGet]
     [Route("findEmployee")]
     public async Task<IActionResult> GetById([FromQuery] string id)
     {
-        Console.WriteLine("Id number is  : " + id);
-        var employee = await _repo.FindAsync(id);
-        if (employee != null)
+        Employee? employee = await _repo.FindAsync(id);
+        if (employee is not null)
         {
             return Ok(employee);
         }
@@ -42,7 +45,11 @@ public class EmployeesController : ControllerBase
     {
         _repo.Insert(employee);
         var data = await _repo.GetAllAsync();
-        return Ok(data);
+        if (data is not null)
+        {
+            return Ok(data);
+        }
+        return BadRequest("New user can't be created.");
     }
 
     [HttpDelete]
