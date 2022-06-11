@@ -1,8 +1,6 @@
-using System.Data;
 using Core.DbAccess;
 using Core.Models;
-using MySql.Data.MySqlClient;
-using WebAPI.Interfaces;
+using QuickType;
 
 namespace WebAPI.Repositories
 {
