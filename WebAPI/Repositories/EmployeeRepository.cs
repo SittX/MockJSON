@@ -1,70 +1,57 @@
+using Core.DataAccess;
+using Core.Interfaces;
 using Core.Models;
-using Newtonsoft.Json;
 using WebAPI.Interfaces;
 namespace WebAPI.Repositories;
 
-public class EmployeeRepository : IRepository<Employee>
-{
-    private string path = "../Core/Data/employeeData.json";
-    private IEnumerable<Employee> _employees = new List<Employee>();
 
-    public EmployeeRepository()
+public class EmployeeRepository : IEmployeeRepository
+{
+    private IEnumerable<Employee> _employees = new List<Employee>();
+    private IEmployeeDataAccess _dataAccess;
+    public EmployeeRepository(IEmployeeDataAccess dataAccess)
     {
+        _dataAccess = dataAccess;
         PopulateEmployeeList();
     }
 
-    private void PopulateEmployeeList()
+    private async void PopulateEmployeeList()
     {
-        var result = File.ReadAllText(path);
-        var data = JsonConvert.DeserializeObject<List<Employee>>(result);
-        if (data != null) _employees = data;
-    }
-
-    public void Delete(string id)
-    {
-        _employees = _employees.Where(e => e.EmployeeId != id).ToList();
-    }
-
-    public async Task<IEnumerable<Employee>> GetAllAsync()
-    {
-        try
+        var data = await _dataAccess.LoadData();
+        if (data is not null)
         {
-            // Check if _employee already populated with data else fetch data
-            if (_employees != null && _employees.GetEnumerator().MoveNext()) return _employees;
-
-            var json = await File.ReadAllTextAsync(path);
-            var result = JsonConvert.DeserializeObject<List<Employee>>(json);
-
-            if (result == null)
-            {
-                return Enumerable.Empty<Employee>();
-            }
-            else
-            {
-                _employees = result;
-                return _employees;
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-            return Enumerable.Empty<Employee>();
+            _employees = data;
         }
     }
-    public Task<Employee> FindAsync(string id)
-    {
-        var result = _employees.Where(e => e.EmployeeId == id).ToList();
-        return Task.FromResult(result[0]);
-    }
-    public void Insert(Employee newItem)
-    {
-        // This is only adding new item to the In Memory object and not to the real Db context
-        // If this method does not work try below one
-        // _employees.Append(newItem);
 
-        // This one might work well than the upper one
-        _employees = _employees.Append(newItem);
+
+    #region CRUD with DataAccess layer
+    public async Task<IEnumerable<Employee>> GetEmployees()
+    {
+        if (_employees.GetEnumerator().MoveNext())
+        {
+            return _employees;
+        }
+        var data = await _dataAccess.LoadData();
+        if (data is not null)
+        {
+            return data;
+        }
+        return Enumerable.Empty<Employee>();
     }
+
+
+    public Task<Employee> SearchEmployee(string id)
+    {
+        var results = _employees.Where(e => e.EmployeeId == id);
+        if (results is not null)
+        {
+            return Task.FromResult(results.FirstOrDefault());
+
+        }
+        return Task.FromResult(new Employee());
+    }
+
 
     public void Update(string id, Employee updatedItem)
     {
@@ -83,4 +70,51 @@ public class EmployeeRepository : IRepository<Employee>
             }
         }
     }
+
+
+    public Task Delete(string id)
+    {
+        _employees = _employees.Where(e => e.EmployeeId != id).ToList();
+        return Task.CompletedTask;
+    }
+
+    public Task<IEnumerable<Employee>> Insert(Employee newItem)
+    {
+        if (newItem is null)
+        {
+            return Task.FromResult(Enumerable.Empty<Employee>());
+        }
+
+        if (newItem.Job is not null)
+        {
+            var currentJob = new Job()
+            {
+                Title = newItem.Job.Title,
+                Department = newItem.Job.Department,
+                Company = newItem.Job.Company
+            };
+
+            var emp = new Employee()
+            {
+                EmployeeId = newItem.EmployeeId,
+                FirstName = newItem.FirstName,
+                LastName = newItem.LastName,
+                Email = newItem.Email,
+                Gender = newItem.Gender,
+                PhoneNumber = newItem.PhoneNumber,
+                Education = newItem.Education,
+                Job = currentJob,
+                PreviousJobs = newItem.PreviousJobs
+            };
+            // Assign a new sequence returned from Append() method to _employee variable 
+            _employees = _employees.Append(emp);
+
+            return Task.FromResult(_employees);
+        }
+
+        return Task.FromResult(Enumerable.Empty<Employee>());
+    }
+    #endregion
+
 }
+

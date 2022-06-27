@@ -8,14 +8,14 @@ namespace WebAPI
 
     public class Employee_ValidationActionFilter : ActionFilterAttribute
     {
-        private readonly IRepository<Employee> _repo;
-        public Employee_ValidationActionFilter(IRepository<Employee> repo)
+        private readonly IEmployeeRepository _repo;
+        public Employee_ValidationActionFilter(IEmployeeRepository repo)
         {
             _repo = repo;
         }
         public override async void OnActionExecuting(ActionExecutingContext context)
         {
-            IEnumerable<Employee> employees = await _repo.GetAllAsync();
+            IEnumerable<Employee> employees = await _repo.GetEmployees();
             var employee = context.ActionArguments["employee"] as Employee;
 
             if (employee is not null)

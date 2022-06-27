@@ -4,33 +4,28 @@ using WebAPI.Interfaces;
 
 namespace WebAPI;
 
-[ApiVersion("1.0")]
 [ApiController]
 [Route("/api/[controller]")]
 public class EmployeesController : ControllerBase
 {
-    private IRepository<Employee> _repo;
-    public EmployeesController(IRepository<Employee> repo)
+    private IEmployeeRepository _repo;
+    public EmployeesController(IEmployeeRepository repo)
     {
         _repo = repo;
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetEmployeesAsync()
+    public async Task<IActionResult> GetEmployees()
     {
-        var employees = await _repo.GetAllAsync();
-        if (employees is not null)
-        {
-            return Ok(employees);
-        }
-        return BadRequest();
+        var employees = await _repo.GetEmployees();
+        return Ok(employees);
     }
 
     [HttpGet]
-    [Route("findEmployee")]
-    public async Task<IActionResult> GetById([FromQuery] string id)
+    [Route("{id}")]
+    public async Task<IActionResult> SearchEmployee(string id)
     {
-        var employee = await _repo.FindAsync(id);
+        var employee = await _repo.SearchEmployee(id);
         if (employee is not null)
         {
             return Ok(employee);
@@ -39,12 +34,10 @@ public class EmployeesController : ControllerBase
     }
 
     [HttpPost]
-    [Route("newEmployee")]
-    [ServiceFilter(typeof(Employee_ValidationActionFilter))]
+    // [ServiceFilter(typeof(Employee_ValidationActionFilter))]
     public async Task<IActionResult> CreateNewEmployee([FromBody] Employee employee)
     {
-        _repo.Insert(employee);
-        var data = await _repo.GetAllAsync();
+        var data = await _repo.Insert(employee);
         if (data is not null)
         {
             return Ok(data);
@@ -53,19 +46,17 @@ public class EmployeesController : ControllerBase
     }
 
     [HttpDelete]
-    [Route("removeEmployee")]
-    public async Task<IActionResult> RemoveEmployee([FromQuery] string empId)
+    public async Task<IActionResult> RemoveEmployee([FromQuery] string id)
     {
-        _repo.Delete(empId);
-        var data = await _repo.GetAllAsync();
+        await _repo.Delete(id);
+        var data = await _repo.GetEmployees();
         return Ok(data);
     }
 
     [HttpPut]
-    [Route("updateEmployee")]
-    public Task UpdateEmployee([FromQuery] string empId, [FromBody] Employee newEmployee)
+    public Task UpdateEmployee([FromQuery] string id, [FromBody] Employee newEmployee)
     {
-        _repo.Update(empId, newEmployee);
+        _repo.Update(id, newEmployee);
         return Task.FromResult("Db is updated");
     }
 
