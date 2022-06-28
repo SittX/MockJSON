@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Core.Models;
 
 namespace Core.Interfaces;
