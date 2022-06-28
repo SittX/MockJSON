@@ -17,23 +17,30 @@ namespace WebAPI.Repositories.V2
         }
 
 
-        public async Task<IEnumerable<EmployeeV2>> GetEmployees()
+        public async Task<IEnumerable<EmployeeV2>> GetAllEmployees()
         {
             if (_employees.GetEnumerator().MoveNext())
             {
                 return _employees;
             }
+
             var data = await _dataAccess.LoadData();
-            return data;
+            if (data is not null)
+            {
+                return data;
+            }
+            else
+            {
+                return Enumerable.Empty<EmployeeV2>();
+            }
         }
 
-        public Task<EmployeeV2> Search(int id)
+        public Task<EmployeeV2> SearchEmployee(int id)
         {
-            var results = _employees.Where(e => e.Id == id);
-            if (results is not null && results.FirstOrDefault() is not null)
+            var results = _employees.Where(e => e.Id == id).FirstOrDefault();
+            if (results is not null)
             {
-                return Task.FromResult(results.FirstOrDefault());
-
+                return Task.FromResult(results);
             }
             return Task.FromResult(new EmployeeV2());
         }
@@ -44,7 +51,7 @@ namespace WebAPI.Repositories.V2
             return Task.FromResult(_employees);
         }
 
-        public void Update(int id, EmployeeV2 updatedItem)
+        public void UpdateEmployee(int id, EmployeeV2 updatedItem)
         {
             foreach (var emp in _employees)
             {
@@ -67,10 +74,9 @@ namespace WebAPI.Repositories.V2
             }
         }
 
-        public Task Delete(int id)
+        public void Delete(int id)
         {
             _employees = _employees.Where(e => e.Id != id).ToList();
-            return Task.CompletedTask;
         }
 
     }

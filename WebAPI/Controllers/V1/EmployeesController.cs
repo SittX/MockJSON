@@ -15,15 +15,19 @@ public class EmployeesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetEmployees()
+    public async Task<IActionResult> ReturnAllEmployees()
     {
         var employees = await _repo.GetEmployees();
-        return Ok(employees);
+        if (employees is not null)
+        {
+            return Ok(employees);
+        }
+        return BadRequest();
     }
 
     [HttpGet]
     [Route("{id}")]
-    public async Task<IActionResult> SearchEmployee(string id)
+    public async Task<IActionResult> ReturnEmployeeById(string id)
     {
         var employee = await _repo.SearchEmployee(id);
         if (employee is not null)
@@ -35,7 +39,7 @@ public class EmployeesController : ControllerBase
 
     [HttpPost]
     // [ServiceFilter(typeof(Employee_ValidationActionFilter))]
-    public async Task<IActionResult> CreateNewEmployee([FromBody] Employee employee)
+    public async Task<IActionResult> InsertNewEmployee([FromBody] Employee employee)
     {
         var data = await _repo.Insert(employee);
         if (data is not null)
@@ -48,16 +52,28 @@ public class EmployeesController : ControllerBase
     [HttpDelete]
     public async Task<IActionResult> RemoveEmployee([FromQuery] string id)
     {
-        await _repo.Delete(id);
+        _repo.Delete(id);
+
+        // Return the new collection to the user
         var data = await _repo.GetEmployees();
-        return Ok(data);
+        if (data is not null)
+        {
+            return Ok(data);
+
+        }
+        return BadRequest();
     }
 
     [HttpPut]
-    public Task UpdateEmployee([FromQuery] string id, [FromBody] Employee newEmployee)
+    public async Task<IActionResult> UpdateEmployee([FromQuery] string id, [FromBody] Employee newEmployee)
     {
         _repo.Update(id, newEmployee);
-        return Task.FromResult("Db is updated");
+        var data = await _repo.GetEmployees();
+        if (data is not null)
+        {
+            return Ok(data);
+        }
+        return BadRequest();
     }
 
 }

@@ -4,10 +4,10 @@ namespace WebAPI.Interfaces.V2
 {
     public interface IEmployeeRepositoryV2
     {
-        Task Delete(int id);
-        Task<IEnumerable<EmployeeV2>> GetEmployees();
+        void Delete(int id);
+        Task<IEnumerable<EmployeeV2>> GetAllEmployees();
         Task<IEnumerable<EmployeeV2>> Insert(EmployeeV2 emp);
-        Task<EmployeeV2> Search(int id);
-        void Update(int id, EmployeeV2 updatedItem);
+        Task<EmployeeV2> SearchEmployee(int id);
+        void UpdateEmployee(int id, EmployeeV2 updatedItem);
     }
 }

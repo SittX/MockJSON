@@ -4,7 +4,7 @@ namespace WebAPI.Interfaces
 {
     public interface IEmployeeRepository
     {
-        Task Delete(string id);
+        void Delete(string id);
         Task<IEnumerable<Employee>> GetEmployees();
         Task<IEnumerable<Employee>> Insert(Employee newItem);
         Task<Employee> SearchEmployee(string id);

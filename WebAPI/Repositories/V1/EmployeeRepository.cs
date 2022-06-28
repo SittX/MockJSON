@@ -15,6 +15,7 @@ public class EmployeeRepository : IEmployeeRepository
         PopulateEmployeeList();
     }
 
+    // This method is used to populate _employees collection when the class got instantiated for the first time
     private async void PopulateEmployeeList()
     {
         var data = await _dataAccess.LoadData();
@@ -28,27 +29,32 @@ public class EmployeeRepository : IEmployeeRepository
     #region CRUD with DataAccess layer
     public async Task<IEnumerable<Employee>> GetEmployees()
     {
+        // Check if the collection is empty or not
         if (_employees.GetEnumerator().MoveNext())
         {
             return _employees;
         }
-        var data = await _dataAccess.LoadData();
-        if (data is not null)
+
+        var empList = await _dataAccess.LoadData();
+        if (empList is not null)
         {
-            return data;
+            return empList;
         }
-        return Enumerable.Empty<Employee>();
+        else
+        {
+            return Enumerable.Empty<Employee>();
+        }
     }
 
 
     public Task<Employee> SearchEmployee(string id)
     {
-        var results = _employees.Where(e => e.EmployeeId == id);
-        if (results is not null)
+        var empList = _employees.Where(e => e.EmployeeId == id).FirstOrDefault();
+        if (empList is not null)
         {
-            return Task.FromResult(results.FirstOrDefault());
-
+            return Task.FromResult(empList);
         }
+
         return Task.FromResult(new Employee());
     }
 
@@ -72,20 +78,21 @@ public class EmployeeRepository : IEmployeeRepository
     }
 
 
-    public Task Delete(string id)
+    public void Delete(string id)
     {
         _employees = _employees.Where(e => e.EmployeeId != id).ToList();
-        return Task.CompletedTask;
     }
 
     public Task<IEnumerable<Employee>> Insert(Employee newItem)
     {
+        // Guard clause
         if (newItem is null)
         {
             return Task.FromResult(Enumerable.Empty<Employee>());
         }
 
-        if (newItem.Job is not null)
+        // Create new instances of Job and PreviousJob classes and insert into Employee class
+        if (newItem.Job is not null && newItem.PreviousJobs is not null)
         {
             var currentJob = new Job()
             {
@@ -111,8 +118,10 @@ public class EmployeeRepository : IEmployeeRepository
 
             return Task.FromResult(_employees);
         }
-
-        return Task.FromResult(Enumerable.Empty<Employee>());
+        else
+        {
+            return Task.FromResult(Enumerable.Empty<Employee>());
+        }
     }
     #endregion
 }

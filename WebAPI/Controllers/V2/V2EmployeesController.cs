@@ -5,6 +5,8 @@ using WebAPI.Interfaces.V2;
 
 namespace WebAPI.Controllers.V2
 {
+    [ApiController]
+    [Route("/api/[controller]")]
     public class V2EmployeesController : ControllerBase
     {
         private IEmployeeRepositoryV2 _repo;
@@ -14,9 +16,9 @@ namespace WebAPI.Controllers.V2
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetEmployeesAsync()
+        public async Task<IActionResult> GetAllEmployeesAsync()
         {
-            var employees = await _repo.GetEmployees();
+            var employees = await _repo.GetAllEmployees();
             return Ok(employees);
         }
 
@@ -24,7 +26,7 @@ namespace WebAPI.Controllers.V2
         [Route("findEmployee")]
         public async Task<IActionResult> GetById([FromQuery] int id)
         {
-            var employee = await _repo.Search(id);
+            var employee = await _repo.SearchEmployee(id);
             if (employee is not null)
             {
                 return Ok(employee);
@@ -54,7 +56,7 @@ namespace WebAPI.Controllers.V2
         [Route("updateEmployee")]
         public Task UpdateEmployee([FromQuery] int id, [FromBody] EmployeeV2 newEmployee)
         {
-            _repo.Update(id, newEmployee);
+            _repo.UpdateEmployee(id, newEmployee);
             return Task.CompletedTask;
         }
 

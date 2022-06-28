@@ -18,7 +18,7 @@ public class EmployeeDataAccessV2 : IEmployeeDataAccessV2
     }
 
 
-    public async Task<EmployeeV2?> Search(int id)
+    public async Task<EmployeeV2?> SearchEmployee(int id)
     {
 
         using (var connection = new MySqlConnection(_config.GetConnectionString("DefaultConnection")))
