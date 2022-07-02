@@ -14,8 +14,14 @@ namespace WebAPI.Repositories.V2
         public EmployeeRepositoryV2(IEmployeeDataAccessV2 dataAccess)
         {
             _dataAccess = dataAccess;
+            Task task = PopulateList();
         }
 
+        // Method to populate the _employee List
+        private async Task PopulateList()
+        {
+            _employees = await GetAllEmployees();
+        }
 
         public async Task<IEnumerable<EmployeeV2>> GetAllEmployees()
         {
@@ -35,20 +41,22 @@ namespace WebAPI.Repositories.V2
             }
         }
 
-        public Task<EmployeeV2> SearchEmployee(int id)
+        public async Task<EmployeeV2> SearchEmployee(int id)
         {
+            await PopulateList();
             var results = _employees.Where(e => e.Id == id).FirstOrDefault();
             if (results is not null)
             {
-                return Task.FromResult(results);
+                return results;
             }
-            return Task.FromResult(new EmployeeV2());
+            return new EmployeeV2();
         }
 
-        public Task<IEnumerable<EmployeeV2>> Insert(EmployeeV2 emp)
+        public async Task<IEnumerable<EmployeeV2>> CreateEmployee(EmployeeV2 emp)
         {
+            await PopulateList();
             _employees = _employees.Append(emp);
-            return Task.FromResult(_employees);
+            return _employees;
         }
 
         public void UpdateEmployee(int id, EmployeeV2 updatedItem)
@@ -74,7 +82,7 @@ namespace WebAPI.Repositories.V2
             }
         }
 
-        public void Delete(int id)
+        public void RemoveEmployee(int id)
         {
             _employees = _employees.Where(e => e.Id != id).ToList();
         }

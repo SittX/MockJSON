@@ -16,15 +16,15 @@ namespace WebAPI.Controllers.V2
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllEmployeesAsync()
+        public async Task<IActionResult> GetEmployees()
         {
             var employees = await _repo.GetAllEmployees();
             return Ok(employees);
         }
 
         [HttpGet]
-        [Route("findEmployee")]
-        public async Task<IActionResult> GetById([FromQuery] int id)
+        [Route("{id}")]
+        public async Task<IActionResult> GetEmployeeById([FromRoute] int id)
         {
             var employee = await _repo.SearchEmployee(id);
             if (employee is not null)
@@ -35,26 +35,31 @@ namespace WebAPI.Controllers.V2
         }
 
         [HttpPost]
-        [Route("newEmployee")]
         // [ServiceFilter(typeof(Employee_ValidationActionFilter))]
-        public IActionResult InsertNewEmployee([FromBody] EmployeeV2 employee)
+        public IActionResult CreateNewEmployee([FromBody] EmployeeV2 employee)
         {
-            _repo.Insert(employee);
-            return Ok("Ok");
-
+            var data = _repo.CreateEmployee(employee);
+            if (data is not null)
+            {
+                return Ok(data);
+            }
+            else
+            {
+                return Ok("New user has been created.");
+            }
         }
 
         [HttpDelete]
-        [Route("removeEmployee")]
-        public Task RemoveEmployee([FromQuery] int id)
+        [Route("{id}")]
+        public Task RemoveEmployee([FromRoute] int id)
         {
-            _repo.Delete(id);
+            _repo.RemoveEmployee(id);
             return Task.CompletedTask;
         }
 
         [HttpPut]
-        [Route("updateEmployee")]
-        public Task UpdateEmployee([FromQuery] int id, [FromBody] EmployeeV2 newEmployee)
+        [Route("{id}")]
+        public Task UpdateEmployee([FromRoute] int id, [FromBody] EmployeeV2 newEmployee)
         {
             _repo.UpdateEmployee(id, newEmployee);
             return Task.CompletedTask;
