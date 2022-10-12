@@ -1,8 +1,6 @@
 using Core.DataAccess;
+using Core.DataAccess.V1;
 using Core.Interfaces;
-using Core.Models;
-using Microsoft.AspNetCore.Mvc.Versioning;
-using WebAPI;
 using WebAPI.Interfaces;
 using WebAPI.Interfaces.V2;
 using WebAPI.Repositories;

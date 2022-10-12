@@ -2,7 +2,7 @@ using Core.Interfaces;
 using Core.Models;
 using Newtonsoft.Json;
 
-namespace Core.DataAccess
+namespace Core.DataAccess.V1
 {
     public class EmployeeDataAccess : IEmployeeDataAccess
     {

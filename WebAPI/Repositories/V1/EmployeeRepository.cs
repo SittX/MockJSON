@@ -61,20 +61,40 @@ public class EmployeeRepository : IEmployeeRepository
 
     public void Update(string id, Employee updatedItem)
     {
-        foreach (var emp in _employees)
+        var emp = _employees.Where(e => e.EmployeeId == id).First() as Employee;
+        emp.FirstName = updatedItem.FirstName;
+        emp.LastName = updatedItem.LastName;
+        emp.Email = updatedItem.Email;
+        emp.Gender = updatedItem.Gender;
+        emp.Education = updatedItem.Education;
+        emp.Job = updatedItem.Job;
+        emp.PreviousJobs = updatedItem.PreviousJobs;
+        emp.PhoneNumber = updatedItem.PhoneNumber;
+
+
+        _employees.Where(e =>
         {
-            if (emp.EmployeeId == id)
+            if (e.EmployeeId == id)
             {
-                emp.FirstName = updatedItem.FirstName;
-                emp.LastName = updatedItem.LastName;
-                emp.Email = updatedItem.Email;
-                emp.Gender = updatedItem.Gender;
-                emp.Education = updatedItem.Education;
-                emp.Job = updatedItem.Job;
-                emp.PreviousJobs = updatedItem.PreviousJobs;
-                emp.PhoneNumber = updatedItem.PhoneNumber;
+                e = emp;
             }
-        }
+            return true;
+        });
+
+        // foreach (var emp in _employees)
+        // {
+        //     if (emp.EmployeeId == id)
+        //     {
+        //         emp.FirstName = updatedItem.FirstName;
+        //         emp.LastName = updatedItem.LastName;
+        //         emp.Email = updatedItem.Email;
+        //         emp.Gender = updatedItem.Gender;
+        //         emp.Education = updatedItem.Education;
+        //         emp.Job = updatedItem.Job;
+        //         emp.PreviousJobs = updatedItem.PreviousJobs;
+        //         emp.PhoneNumber = updatedItem.PhoneNumber;
+        //     }
+        // }
     }
 
 
