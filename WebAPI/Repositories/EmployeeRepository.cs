@@ -1,21 +1,21 @@
 using Core.Models;
-using MockJSONDataAPI.Interfaces;
 using Newtonsoft.Json;
+using WebAPI.Interfaces;
 
-namespace MockJSONDataAPI.Repositories
+namespace WebAPI.Repositories
 {
-    public class EmployeesRepository : IEmployeesRepository
+    public class EmployeeRepository : IEmployeeRepository
     {
-        private string path = "../Core/Data/employeeData.json";
+        private static string _path = "../Core/Data/employeeData.json";
         private IList<Employee> _employees = new List<Employee>();
 
-        public EmployeesRepository()
+        public EmployeeRepository()
         {
             PopulateEmpList();
         }
         private void PopulateEmpList()
         {
-            var result = File.ReadAllText(path);
+            var result = File.ReadAllText(_path);
             var data = JsonConvert.DeserializeObject<List<Employee>>(result);
             if (data != null) _employees = data;
         }
@@ -37,7 +37,7 @@ namespace MockJSONDataAPI.Repositories
             if (_employees.Count > 0) return _employees;
             try
             {
-                var result = await File.ReadAllTextAsync(path);
+                var result = await File.ReadAllTextAsync(_path);
                 var data = JsonConvert.DeserializeObject<List<Employee>>(result);
                 if (data is not null)
                     _employees = data;

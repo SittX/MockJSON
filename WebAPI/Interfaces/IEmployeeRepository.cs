@@ -1,8 +1,8 @@
 using Core.Models;
 
-namespace MockJSONDataAPI.Interfaces
+namespace WebAPI.Interfaces
 {
-    public interface IEmployeesRepository
+    public interface IEmployeeRepository
     {
         Task<IList<Employee>> GetAllAsync();
         Task<Employee> FindAsync(string id);

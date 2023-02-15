@@ -1,24 +1,22 @@
 using Core.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using MockJSONDataAPI.Interfaces;
+using WebAPI.Interfaces;
 
-namespace MockJSONDataAPI
+namespace WebAPI.Filters
 {
-
-    public class Employee_ValidationActionFilter : ActionFilterAttribute
+    public class EmployeeDuplicationActionFilter : ActionFilterAttribute
     {
-        private readonly IEmployeesRepository _repo;
-        public Employee_ValidationActionFilter(IEmployeesRepository repo)
+        private readonly IEmployeeRepository _repo;
+        public EmployeeDuplicationActionFilter(IEmployeeRepository repo)
         {
             _repo = repo;
         }
         public override async void OnActionExecuting(ActionExecutingContext context)
         {
             IList<Employee> employees = await _repo.GetAllAsync();
-            var employee = context.ActionArguments["employee"] as Employee;
 
-            if (employee is not null)
+            if (context.ActionArguments["employee"] is Employee employee)
             {
                 foreach (var emp in employees)
                 {

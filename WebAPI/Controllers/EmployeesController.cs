@@ -1,24 +1,25 @@
 using Core.Models;
 using Microsoft.AspNetCore.Mvc;
-using MockJSONDataAPI.Interfaces;
+using WebAPI.Filters;
+using WebAPI.Interfaces;
 
-namespace MockJSONDataAPI;
+namespace WebAPI.Controllers;
 
-[ApiVersion("1.0")]
+// [ApiVersion("1.0")]
 [ApiController]
 [Route("/api/[controller]")]
 public class EmployeesController : ControllerBase
 {
-    private IEmployeesRepository _repo;
-    public EmployeesController(IEmployeesRepository repo)
+    private readonly IEmployeeService _empService;
+    public EmployeesController(IEmployeeService empService)
     {
-        _repo = repo;
+        _empService = empService;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetEmployeesAsync()
     {
-        var employees = await _repo.GetAllAsync();
+        var employees = await _empService.GetAllAsync();
         if (employees.Count > 0)
         {
             return Ok(employees);
@@ -30,34 +31,34 @@ public class EmployeesController : ControllerBase
     [Route("findEmployee")]
     public async Task<IActionResult> GetById([FromQuery] string id)
     {
-        Employee? employee = await _repo.FindAsync(id);
-        if (employee is not null)
+        Employee? employee = await _empService.FindAsync(id);
+        if (employee.Equals(null))
         {
-            return Ok(employee);
+            return BadRequest("User with the given Id cannot be found!");
         }
-        return BadRequest("User with the given Id cannot be found!");
+        return Ok(employee);
     }
 
     [HttpPost]
     [Route("newEmployee")]
-    [ServiceFilter(typeof(Employee_ValidationActionFilter))]
+    [ServiceFilter(typeof(EmployeeDuplicationActionFilter))]
     public async Task<IActionResult> CreateNewEmployee([FromBody] Employee employee)
     {
-        _repo.Insert(employee);
-        var data = await _repo.GetAllAsync();
-        if (data is not null)
+        _empService.Insert(employee);
+        var data = await _empService.GetAllAsync();
+        if (data.Equals(null))
         {
-            return Ok(data);
+            return BadRequest("New user can't be created. Please try again.");
         }
-        return BadRequest("New user can't be created.");
+        return Ok(data);
     }
 
     [HttpDelete]
     [Route("removeEmployee")]
     public async Task<IActionResult> RemoveEmployee([FromQuery] string empId)
     {
-        _repo.Delete(empId);
-        var data = await _repo.GetAllAsync();
+        _empService.Delete(empId);
+        var data = await _empService.GetAllAsync();
         return Ok(data);
     }
 
@@ -65,7 +66,7 @@ public class EmployeesController : ControllerBase
     [Route("updateEmployee")]
     public async Task<IActionResult> UpdateEmployee([FromQuery] string empId, [FromBody] Employee newEmployee)
     {
-        var data = await _repo.UpdateAsync(empId, newEmployee);
+        var data = await _empService.UpdateAsync(empId, newEmployee);
         return Ok(data);
     }
 
